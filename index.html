@@ -90,6 +90,18 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-size: 1.5rem; text-align: center; z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.5s; }
         .overlay.visible { opacity: 1; visibility: visible; }
         #thank-you-kiss { font-size: 3rem; display: inline-block; animation: grow-kiss 1s forwards 0.5s; transform: scale(0); }
+		#invisible-clause-trigger {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-family: 'Cinzel', serif;
+    color: transparent; /* Makes the text invisible */
+    cursor: pointer;
+    user-select: none; /* Prevents text selection */
+    z-index: 20;
+}
         @keyframes grow-kiss { to { transform: scale(1.5); } }
 
         /* SCREEN 3: Hidden Clauses */
@@ -101,7 +113,10 @@
         #reveal-text p { color: #f0f0f0; font-size: 1.8rem; line-height: 1.6; margin: 15px 0; opacity: 0; transform: translateY(20px); animation: fade-up 1.5s forwards cubic-bezier(0.25, 1, 0.5, 1); }
         @keyframes fade-up { to { opacity: 1; transform: translateY(0); } }
         .soft-confetti { position: absolute; font-size: 1.5rem; animation: float-down 10s infinite linear; pointer-events: none; opacity: 0.7; }
-        @keyframes float-down { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+        @keyframes float-down {
+    from { transform: translateY(-10vh); }
+    to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
 
         .footer { position: absolute; bottom: 15px; font-size: 0.8rem; opacity: 0.6; }
         .footer a { color: var(--text-dark); cursor: pointer; text-decoration: underline; }
@@ -116,7 +131,7 @@
             <div class="scene" id="scene-0"><h1 class="h1" id="welcome-title"></h1><p id="entry-text"></p><p class="footnote" id="footnote-text"></p><div id="entry-buttons"><button id="ready-btn">I am ready 😌</button><button id="sus-btn" style="background: #777;">This looks sus 🤨</button></div><div class="footer">A Contract by <a id="footer-name">Swikar</a></div></div>
             <div class="scene" id="scene-1"><h1 class="h1">Identity Check</h1><div class="form-group"><label>Name</label><div class="form-value-box">Meri Sanu ❤️</div></div><div class="form-group"><label>Designated Role</label><div class="role-option" data-role="queen">Queen 👑</div><div class="role-option" data-role="girlfriend">Girlfriend ❤️</div><div class="role-option selected" data-role="world">My whole world 🌍</div></div><p id="verification-error"></p><button id="verify-btn">Confirm Identity</button></div>
             <div class="scene" id="scene-2"><h1 class="h1">Promise Selection</h1><div id="snuggles-meter"><div id="snuggles-emoji">🐧</div><div class="progress-bar"><div id="progress-fill"></div></div></div><div id="promise-board"></div><p id="context-message"></p><button id="clauses-btn">I agree to these terms</button></div>
-            <div class="scene" id="scene-3"><h1 class="h1" id="clauses-title">Hidden Clauses</h1><p>Every contract has fine print.<br>Curious people usually find them.</p><p style="margin-top:20px;opacity:0.7;">(Try long-pressing, etc.)</p><button id="final-confirm-btn">I found enough secrets</button></div>
+            <div class="scene" id="scene-3"><div id="invisible-clause-trigger">7.3</div> <h1 class="h1" id="clauses-title">Hidden Clauses</h1><p>Every contract has fine print.<br>Curious people usually find them.</p><p style="margin-top:20px;opacity:0.7;">(Try long-pressing, etc.)</p><button id="final-confirm-btn">I found enough secrets</button></div>
             <div class="scene" id="scene-4"><p id="final-warning" style="font-size: 2rem; color:#d90429; font-weight:700;">⚠️ FINAL CONFIRMATION ⚠️</p><p>This cannot be undone.</p><div style="margin-top:30px;"><button id="yes-button">YES, I PROMISE</button><button id="no-button" style="background:#777;">WAIT NO</button></div></div>
             <div class="scene" id="scene-5"><h1 class="h1">Sign Here</h1><p>Click the heart to sign with yours.</p><div id="heart-signer" style="font-size:5rem; cursor:pointer;">🤍</div><p><span id="heart-clicks">0</span>/5</p></div>
             <div class="scene" id="scene-6"><div id="reveal-text"></div></div>
@@ -142,6 +157,18 @@
             { text: "I promise to fight the world for you", flirty: "You and me against this world. ❤️‍🔥", sad: "You want to fight them... alone? 🥺" },
             { id: 'special', text: "I promise to love you on worst days", flirty: "Those are the days I'll hold you tightest.🫂", sad: "" }
         ];
+		
+		const noButtonMessages = [
+			"Is this a joke? My heart just cracked, it's shattered. haye daiyaa 🥺",
+			"But... but I promised Snuggles we'd do this. 😟🐧",
+			"EXCUSE ME?! After all we've been through? pakh na talai 😤",
+			"So this is how it ends... in a flurry of doubt and a runaway button. Najiski hai 😭",
+			"Waaah! You clicked the no-no button! Waah re Waah teri khel 😭💔",
+			"Error 404: Seriousness Not Found. Please try loving me again. 🥹❤️",
+			"Well, I guess I'll just go to be a lonely sadhu. Pyaar wyaar sab ek jaal hey 🥲",
+			"Bold move. Wow women. Wow. . . . . 😏",
+			"Did you misclick or are you just testing my button's cardio? Functionality test ho ??? 😉"
+		];
 
         // --- Core Functions ---
         const vibrate = () => { if (navigator.vibrate) navigator.vibrate(50); };
@@ -234,21 +261,75 @@
     }
 };
                     break;
-                case 3: // HIDDEN CLAUSES
-                    let longPressTimer;
-                    const scene3 = el('scene-3'), title = el('clauses-title');
-                    const showClause = (txt, x, y) => { const c = document.createElement('div'); c.className = 'hidden-clause'; c.textContent = txt; c.style.left=`${x-100}px`; c.style.top=`${y-50}px`; scene3.appendChild(c); setTimeout(() => c.remove(), 4000); };
-                    const longPressAction = (e) => { longPressTimer = setTimeout(() => showClause("Clause 7.3: Unlimited forehead kisses.", e.clientX, e.clientY), 800); };
-                    
-                    scene3.onmousedown = longPressAction;
-                    title.onmousedown = (e) => { longPressTimer = setTimeout(() => showClause("Secrets are fun, aren't they? 😉", e.clientX, e.clientY), 800); e.stopPropagation(); };
-                    scene3.onmouseup = title.onmouseup = () => clearTimeout(longPressTimer);
-                    // Add touch listeners here if needed for mobile devices.
-                    el('final-confirm-btn').onclick = () => showScene(4);
-                    break;
+                
+				case 3: // HIDDEN CLAUSES (Mobile-Friendly Version)
+					const scene3 = el('scene-3');
+					let longPressTimer;
+					let hasShaken = false; // Prevents the shake clause from appearing multiple times
+
+					const showClause = (txt, x, y) => {
+						const c = document.createElement('div');
+						c.className = 'hidden-clause'; c.textContent = txt;
+						// Center the clause on the touch/click point
+						c.style.left = `${x - c.offsetWidth / 2}px`;
+						c.style.top = `${y - c.offsetHeight / 2}px`;
+						scene3.appendChild(c);
+						setTimeout(() => c.remove(), 4000);
+					};
+
+					// SECRET 1: Invisible Clickable Area
+					el('invisible-clause-trigger').onclick = (e) => {
+						showClause("Clause 7.3: Unlimited forehead kisses.", e.clientX, e.clientY);
+						vibrate();
+					};
+
+					// SECRET 2: Long press on the BACKGROUND (not text)
+					const startLongPress = (e) => {
+						e.preventDefault(); // Prevent text selection on mobile
+						longPressTimer = setTimeout(() => {
+							const touch = e.touches ? e.touches[0] : e;
+							showClause("Secrets are fun, aren't they? 😉", touch.clientX, touch.clientY);
+							vibrate();
+						}, 800);
+					};
+					const endLongPress = () => {
+						clearTimeout(longPressTimer);
+					};
+					
+					scene3.addEventListener('mousedown', startLongPress);
+					scene3.addEventListener('mouseup', endLongPress);
+					scene3.addEventListener('touchstart', startLongPress);
+					scene3.addEventListener('touchend', endLongPress);
+					
+					// SECRET 3: Shake the phone
+					const shakeHandler = (e) => {
+						if (hasShaken) return; // Only trigger once
+						const { x, y, z } = e.accelerationIncludingGravity;
+						if (Math.abs(x) > 15 || Math.abs(y) > 15) {
+							hasShaken = true;
+							showClause("Clause 11: Jealousy allowed, reassurance mandatory. 😠", window.innerWidth / 2, window.innerHeight / 2);
+							vibrate();
+						}
+					};
+					// Check for motion event support before adding listener
+					if (window.DeviceMotionEvent) {
+						window.addEventListener('devicemotion', shakeHandler, false);
+					}
+
+					el('final-confirm-btn').onclick = () => {
+						// Important: Remove event listeners to prevent them from firing on other screens
+						window.removeEventListener('devicemotion', shakeHandler, false);
+						scene3.removeEventListener('mousedown', startLongPress);
+						scene3.removeEventListener('mouseup', endLongPress);
+						scene3.removeEventListener('touchstart', startLongPress);
+						scene3.removeEventListener('touchend', endLongPress);
+						showScene(4);
+					};
+					break;
+				
                 case 6: // FINAL REVEAL
                     const revealContainer = el('reveal-text');
-                    const finalLines = ["This wasn’t a contract.", "This was me saying…", "No matter what happens…", "No matter how hard life gets…", "I promise to be yours.", "And I promise to choose you.", "Every single day.", "Happy Promise Day, मेरी सानु ❤️"];
+                    const finalLines = ["This wasn’t a contract.", "This was me saying…", "No matter what happens…", "No matter how hard life gets…", "I promise to be yours.", "And I promise to choose you.", "Every single day.", "And I promise to make you the happiest person.", "Happy Promise Day, मेरी सानु ❤️"];
                     finalLines.forEach((line, i) => { setTimeout(() => { const p = document.createElement('p'); p.textContent = line; revealContainer.appendChild(p); }, i * 2200); });
                     // Soft confetti
                     for (let i = 0; i < 20; i++) {
@@ -258,7 +339,35 @@
                     }
                     break;
                  // --- Other simplified cases ---
-                case 4: el('yes-button').onclick = () => showScene(5); el('no-button').onmouseover = () => showPopup('Server is unhappy 😌'); break;
+                case 4: // FINAL CONFIRMATION (with message pool)
+					const noBtn = el('no-button');
+					const yesBtn = el('yes-button');
+
+					const triggerNoResponse = () => {
+						// 1. Get a random message from the pool
+						const randomMessage = noButtonMessages[Math.floor(Math.random() * noButtonMessages.length)];
+						showPopup(randomMessage);
+						
+						// 2. Make the button run away (primarily for desktop)
+						if (window.innerWidth > 768) { // Simple check for larger screens
+							noBtn.style.position = 'absolute';
+							noBtn.style.top = `${Math.random() * 80 + 10}%`;
+							noBtn.style.left = `${Math.random() * 80 + 10}%`;
+						}
+						vibrate();
+					};
+
+					// 3. Assign the new function to both hover and click for max compatibility
+					noBtn.onmouseover = triggerNoResponse;
+					noBtn.onclick = triggerNoResponse;
+
+					yesBtn.onclick = () => {
+						// 4. Important: Clean up events to prevent them from firing accidentally later
+						noBtn.onmouseover = null;
+						noBtn.onclick = null;
+						showScene(5);
+					};
+					break;
                 case 5: 
                     let clicks = 0; el('heart-signer').onclick = () => {
                         clicks++; el('heart-clicks').textContent = clicks;
