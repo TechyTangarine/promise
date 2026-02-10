@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Contract of Us 📜✨</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;500&display=swap');
+
+        :root {
+            --bg-parchment: #fef5e7;
+            --bg-pink-start: #ffe4e9;
+            --text-dark: #3a3a3a;
+            --gold-accent: #D4AF37;
+            --pink-accent: #f77fbe;
+            --border-light: rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden; background: #111;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #app-container {
+            width: 100vw; height: 100vh;
+            max-width: 430px; max-height: 932px;
+            background: linear-gradient(160deg, var(--bg-parchment) 0%, var(--bg-pink-start) 100%);
+            position: relative; overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.4);
+        }
+
+        .scene {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 30px; color: var(--text-dark); text-align: center;
+            opacity: 0; visibility: hidden;
+            transform: scale(1.05);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .scene.active { opacity: 1; visibility: visible; transform: scale(1); }
+        .scene h1, .scene .h1 { font-family: 'Cinzel', serif; font-size: 2.5rem; color: var(--gold-accent); text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        
+        button {
+            background: var(--pink-accent); color: white; padding: 15px 35px;
+            font-size: 1.1rem; border-radius: 30px; border: none; cursor: pointer;
+            font-family: 'Poppins', sans-serif; font-weight: 500; margin-top: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover { transform: scale(1.05); }
+
+        /* --- SCREEN 0: ENTRY --- */
+        #welcome-title .char { display: inline-block; opacity: 0; animation: pop-in 0.5s forwards; }
+        @keyframes pop-in { 0% { opacity: 0; transform: scale(2.5); } 100% { opacity: 1; transform: scale(1); } }
+        
+        #entry-text, .footnote { min-height: 25px; line-height: 1.6; }
+        #entry-buttons { opacity: 0; transition: opacity 1s ease; transition-delay: 0.5s; }
+        #entry-buttons.visible { opacity: 1; }
+
+        .shake-anim { animation: shake 0.5s; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        .popup-message { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 10px; z-index: 100; opacity: 0; animation: fade-in-out 3s; }
+        @keyframes fade-in-out { 0%{opacity:0; transform:translate(-50%,10px)} 20%{opacity:1; transform:translate(-50%,0)} 80%{opacity:1; transform:translate(-50%,0)} 100%{opacity:0; transform:translate(-50%,10px)} }
+
+        /* --- SCREEN 1: VERIFICATION --- */
+        .form-group { width: 100%; text-align: left; margin: 15px 0; }
+        .form-value-box { padding: 15px; border: 1px solid var(--border-light); border-radius: 8px; margin-top: 5px; background: rgba(0,0,0,0.03); }
+        .role-option { display: flex; align-items: center; padding: 15px; border: 1px solid var(--border-light); border-radius: 8px; margin-top: 10px; cursor: pointer; transition: background-color 0.2s; }
+        .role-option.selected { background-color: var(--bg-pink-start); border-color: var(--pink-accent); }
+        #verification-error { color: #d90429; font-weight: 500; min-height: 20px; margin-top: 10px; }
+
+        /* --- SCREEN 2: PROMISES --- */
+        #snuggles-meter { display: flex; align-items: center; width: 100%; margin: 15px 0; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 15px; }
+        #snuggles-emoji { font-size: 2.5rem; margin-right: 15px; transition: transform 0.5s; }
+        .progress-bar { flex-grow: 1; height: 25px; background: #e0e0e0; border-radius: 20px; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f77fbe, #ffb3c1); transition: width 0.5s ease; }
+        
+        #promise-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+        .promise-card { background: rgba(255,255,255,0.5); border: 1px solid var(--border-light); padding: 15px; border-radius: 12px; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s; user-select: none; }
+        .promise-card.checked { background: var(--pink-accent); color: white; border-color: var(--pink-accent); transform: scale(1.05); }
+        #context-message { min-height: 20px; margin-top: 10px; font-style: italic; color: var(--pink-accent); font-weight: 500; opacity: 0; transition: opacity 0.5s; }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-size: 1.5rem; text-align: center; z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.5s; }
+        .overlay.visible { opacity: 1; visibility: visible; }
+        #thank-you-kiss { font-size: 3rem; display: inline-block; animation: grow-kiss 1s forwards 0.5s; transform: scale(0); }
+        @keyframes grow-kiss { to { transform: scale(1.5); } }
+
+        /* SCREEN 3: Hidden Clauses */
+         .hidden-clause { position: absolute; background: var(--gold-accent); color: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-size: 1.1rem; opacity: 0; z-index: 5; transform: scale(0); animation: clause-pop 4s forwards; }
+        @keyframes clause-pop { 0% { opacity: 0; transform: scale(0); } 20% { opacity: 1; transform: scale(1.1); } 80% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(0); } }
+
+        /* SCREEN 6: Final Reveal */
+        #scene-6 { background: #1a1a1a; }
+        #reveal-text p { color: #f0f0f0; font-size: 1.8rem; line-height: 1.6; margin: 15px 0; opacity: 0; transform: translateY(20px); animation: fade-up 1.5s forwards cubic-bezier(0.25, 1, 0.5, 1); }
+        @keyframes fade-up { to { opacity: 1; transform: translateY(0); } }
+        .soft-confetti { position: absolute; font-size: 1.5rem; animation: float-down 10s infinite linear; pointer-events: none; opacity: 0.7; }
+        @keyframes float-down { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+
+        .footer { position: absolute; bottom: 15px; font-size: 0.8rem; opacity: 0.6; }
+        .footer a { color: var(--text-dark); cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div id="app-container"></div>
+    <script>
+        // --- App Setup ---
+        const app = document.getElementById('app-container');
+        app.innerHTML = `
+            <div class="scene" id="scene-0"><h1 class="h1" id="welcome-title"></h1><p id="entry-text"></p><p class="footnote" id="footnote-text"></p><div id="entry-buttons"><button id="ready-btn">I am ready 😌</button><button id="sus-btn" style="background: #777;">This looks sus 🤨</button></div><div class="footer">A Contract by <a id="footer-name">Swikar</a></div></div>
+            <div class="scene" id="scene-1"><h1 class="h1">Identity Check</h1><div class="form-group"><label>Name</label><div class="form-value-box">Meri Sanu ❤️</div></div><div class="form-group"><label>Designated Role</label><div class="role-option" data-role="queen">Queen 👑</div><div class="role-option" data-role="girlfriend">Girlfriend ❤️</div><div class="role-option selected" data-role="world">My whole world 🌍</div></div><p id="verification-error"></p><button id="verify-btn">Confirm Identity</button></div>
+            <div class="scene" id="scene-2"><h1 class="h1">Promise Selection</h1><div id="snuggles-meter"><div id="snuggles-emoji">🐧</div><div class="progress-bar"><div id="progress-fill"></div></div></div><div id="promise-board"></div><p id="context-message"></p><button id="clauses-btn">I agree to these terms</button></div>
+            <div class="scene" id="scene-3"><h1 class="h1" id="clauses-title">Hidden Clauses</h1><p>Every contract has fine print.<br>Curious people usually find them.</p><p style="margin-top:20px;opacity:0.7;">(Try long-pressing, etc.)</p><button id="final-confirm-btn">I found enough secrets</button></div>
+            <div class="scene" id="scene-4"><p id="final-warning" style="font-size: 2rem; color:#d90429; font-weight:700;">⚠️ FINAL CONFIRMATION ⚠️</p><p>This cannot be undone.</p><div style="margin-top:30px;"><button id="yes-button">YES, I PROMISE</button><button id="no-button" style="background:#777;">WAIT NO</button></div></div>
+            <div class="scene" id="scene-5"><h1 class="h1">Sign Here</h1><p>Click the heart to sign with yours.</p><div id="heart-signer" style="font-size:5rem; cursor:pointer;">🤍</div><p><span id="heart-clicks">0</span>/5</p></div>
+            <div class="scene" id="scene-6"><div id="reveal-text"></div></div>
+            <div class="overlay" id="not-optional-overlay"><p>This one isn't optional.</p></div>
+            <div class="overlay" id="thank-you-overlay"><div><p style="font-size:3rem;font-weight:700;">THANK U SANURI. Snuggles 🐧 is very happy.</p><span id="thank-you-kiss">😘</span></div></div>
+        `;
+        let currentScene = 0;
+        const scenes = document.querySelectorAll('.scene');
+        const el = (id) => document.getElementById(id);
+        
+        const showScene = (idx) => {
+            scenes[currentScene].classList.remove('active');
+            currentScene = idx;
+            scenes[currentScene].classList.add('active');
+            runSceneLogic(idx);
+        };
+
+        const promises = [
+            { text: "I promise to supisee you every now and then.", flirty: "I know you love surprises and I.. I  love you. 🥰", sad: "But... supisee nahi chaiye aapko... 🥺" },
+            { text: "I promise to annoy you daily", flirty: "It's my primary love language. 😜", sad: "So you want me to be boring? 😭" },
+            { text: "I promise to send you reels", flirty: "Our bond is built on shared memes. 👀", sad: "My 'For You' page will be lonely. 💔" },
+            { text: "I promise to listen (even when bored, or any emotion is there)", flirty: "Because your voice is my favorite sound. 🎧", sad: "Okay I'll just talk to myself then. nbol hai🙄" },
+            { text: "I promise to fight the world for you", flirty: "You and me against this world. ❤️‍🔥", sad: "You want to fight them... alone? 🥺" },
+            { id: 'special', text: "I promise to love you on worst days", flirty: "Those are the days I'll hold you tightest.🫂", sad: "" }
+        ];
+
+        // --- Core Functions ---
+        const vibrate = () => { if (navigator.vibrate) navigator.vibrate(50); };
+        
+        const typeWriter = (element, text, speed, onComplete) => {
+            let i = 0; element.innerHTML = "";
+            const type = () => {
+                if (i < text.length) { element.innerHTML += text[i++]; setTimeout(type, speed); } 
+                else if (onComplete) onComplete();
+            };
+            type();
+        };
+
+        const showPopup = (msg) => {
+            const popup = document.createElement('div'); popup.className = 'popup-message'; popup.textContent = msg;
+            document.body.appendChild(popup); setTimeout(() => popup.remove(), 3000);
+        };
+        
+        // --- SCENE LOGIC RUNNER ---
+        function runSceneLogic(index) {
+            vibrate();
+            switch(index) {
+                case 0: // ENTRY
+                    el('welcome-title').innerHTML = "WELCOME".split('').map(c => `<span class="char">${c}</span>`).join('');
+                    Array.from(el('welcome-title').children).forEach((char, i) => char.style.animationDelay = `${i * 0.15}s`);
+                    setTimeout(() => {
+                        typeWriter(el('entry-text'), "This document is legally binding*", 50, () => {
+                            typeWriter(el('footnote-text'), "(*emotionally)", 50, () => {
+                                el('footnote-text').style.fontWeight = 'bold';
+                                el('entry-buttons').classList.add('visible');
+                            });
+                        });
+                    }, 1500);
+                    el('sus-btn').onclick = () => { el('app-container').classList.add('shake-anim'); setTimeout(() => el('app-container').classList.remove('shake-anim'), 500); vibrate(); };
+                    el('ready-btn').onclick = () => showScene(1);
+                    el('footer-name').onclick = () => { showPopup("Kaha Kaha nahi chupaya chha easter eggs🤭❤️."); el('footer-name').textContent = "your sanu ❤️"; };
+                    break;
+                case 1: // VERIFICATION
+                    let selectedRole = "world";
+                    document.querySelectorAll('.role-option').forEach(opt => {
+                        opt.onclick = (e) => {
+                            const newRole = e.currentTarget.dataset.role;
+                            if (newRole === 'girlfriend' && (selectedRole === 'queen' || selectedRole === 'world')) {
+                                el('verification-error').textContent = selectedRole === 'queen' ? "❌ Cannot downgrade royalty." : "Really? Just a girlfriend? Naah. 😏";
+                                return;
+                            }
+                            selectedRole = newRole;
+                            document.querySelectorAll('.role-option').forEach(r => r.classList.remove('selected'));
+                            e.currentTarget.classList.add('selected');
+                            el('verification-error').textContent = "";
+                        };
+                    });
+                    el('verify-btn').onclick = () => showScene(2);
+                    break;
+                case 2: // PROMISES
+                    const board = el('promise-board'), ctxMsg = el('context-message'); board.innerHTML = '';
+                    const updateHappiness = (isInitial = false) => {
+                        const checkedCount = board.querySelectorAll('.checked').length;
+                        const happiness = (checkedCount / promises.length) * 100;
+                        el('progress-fill').style.width = `${happiness}%`;
+                        el('snuggles-emoji').textContent = happiness < 20 ? '😟' : happiness < 50 ? '🙂' : happiness < 90 ? '😄' : '😍';
+                        
+                    };
+                    promises.forEach(p => {
+                        const card = document.createElement('div');
+                        card.className = 'promise-card checked'; card.textContent = p.text; card.dataset.id = p.id || '';
+                        board.appendChild(card);
+                        card.onclick = () => {
+                            if (card.dataset.id === 'special') { el('not-optional-overlay').classList.add('visible'); setTimeout(() => el('not-optional-overlay').classList.remove('visible'), 2000); return; }
+                            card.classList.toggle('checked'); vibrate();
+                            ctxMsg.style.opacity = '1'; ctxMsg.textContent = card.classList.contains('checked') ? p.flirty : p.sad;
+                            setTimeout(() => ctxMsg.style.opacity = '0', 2500);
+                            updateHappiness();
+                        };
+                    });
+                    updateHappiness(true); // Initial state without triggering advance
+                    el('clauses-btn').onclick = () => {
+    const checkedCount = el('promise-board').querySelectorAll('.checked').length;
+    
+    // Check if all promises are selected WHEN the button is clicked
+    if (checkedCount === promises.length) {
+        el('thank-you-overlay').classList.add('visible');
+        setTimeout(() => {
+            el('thank-you-overlay').classList.remove('visible');
+            showScene(3); // Go to next scene after the overlay
+        }, 3000);
+    } else {
+        // Otherwise, just go to the next scene directly
+        showScene(3);
+    }
+};
+                    break;
+                case 3: // HIDDEN CLAUSES
+                    let longPressTimer;
+                    const scene3 = el('scene-3'), title = el('clauses-title');
+                    const showClause = (txt, x, y) => { const c = document.createElement('div'); c.className = 'hidden-clause'; c.textContent = txt; c.style.left=`${x-100}px`; c.style.top=`${y-50}px`; scene3.appendChild(c); setTimeout(() => c.remove(), 4000); };
+                    const longPressAction = (e) => { longPressTimer = setTimeout(() => showClause("Clause 7.3: Unlimited forehead kisses.", e.clientX, e.clientY), 800); };
+                    
+                    scene3.onmousedown = longPressAction;
+                    title.onmousedown = (e) => { longPressTimer = setTimeout(() => showClause("Secrets are fun, aren't they? 😉", e.clientX, e.clientY), 800); e.stopPropagation(); };
+                    scene3.onmouseup = title.onmouseup = () => clearTimeout(longPressTimer);
+                    // Add touch listeners here if needed for mobile devices.
+                    el('final-confirm-btn').onclick = () => showScene(4);
+                    break;
+                case 6: // FINAL REVEAL
+                    const revealContainer = el('reveal-text');
+                    const finalLines = ["This wasn’t a contract.", "This was me saying…", "No matter what happens…", "No matter how hard life gets…", "I promise to be yours.", "And I promise to choose you.", "Every single day.", "Happy Promise Day, मेरी सानु ❤️"];
+                    finalLines.forEach((line, i) => { setTimeout(() => { const p = document.createElement('p'); p.textContent = line; revealContainer.appendChild(p); }, i * 2200); });
+                    // Soft confetti
+                    for (let i = 0; i < 20; i++) {
+                        const heart = document.createElement('div'); heart.className = 'soft-confetti'; heart.textContent = '💖';
+                        heart.style.left = `${Math.random()*100}vw`; heart.style.animationDelay = `${Math.random()*10}s`; heart.style.fontSize = `${Math.random()*1+0.5}rem`;
+                        el('scene-6').appendChild(heart);
+                    }
+                    break;
+                 // --- Other simplified cases ---
+                case 4: el('yes-button').onclick = () => showScene(5); el('no-button').onmouseover = () => showPopup('Server is unhappy 😌'); break;
+                case 5: 
+                    let clicks = 0; el('heart-signer').onclick = () => {
+                        clicks++; el('heart-clicks').textContent = clicks;
+                        el('heart-signer').textContent = ['🤍', '🩷', '❤️‍🔥', '❤️', '💖', '❤️💏❤️'][clicks];
+                        if (clicks >= 5) setTimeout(() => showScene(6), 1000);
+                    };
+                    break;
+            }
+        }
+        
+        showScene(0);
+    </script>
+</body>
+</html>
